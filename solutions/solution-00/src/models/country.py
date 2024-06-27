@@ -3,31 +3,27 @@ Country related functionality
 """
 
 
-class Country:
-    """
-    Country representation
+from datetime import datetime
+from src import db
+import uuid
 
-    This class does NOT inherit from Base, you can't delete or update a country
+class Country(db.Model):
+    __tablename__ = 'countries'
 
-    This class is used to get and list countries
-    """
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    name = db.Column(db.String(128), nullable=False)
+    code = db.Column(db.String(3), unique=True, nullable=False)
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    updated_at = db.Column(db.DateTime, onupdate=db.func.current_timestamp())
 
-    name: str
-    code: str
-    cities: list
-
-    def __init__(self, name: str, code: str, **kw) -> None:
-        """Dummy init"""
-        super().__init__(**kw)
+    def __init__(self, name: str, code: str):
         self.name = name
         self.code = code
 
     def __repr__(self) -> str:
-        """Dummy repr"""
         return f"<Country {self.code} ({self.name})>"
 
     def to_dict(self) -> dict:
-        """Returns the dictionary representation of the country"""
         return {
             "name": self.name,
             "code": self.code,
@@ -35,28 +31,15 @@ class Country:
 
     @staticmethod
     def get_all() -> list["Country"]:
-        """Get all countries"""
-        from src.persistence import repo
-
-        countries: list["Country"] = repo.get_all("country")
-
-        return countries
+        return Country.query.all()
 
     @staticmethod
     def get(code: str) -> "Country | None":
-        """Get a country by its code"""
-        for country in Country.get_all():
-            if country.code == code:
-                return country
-        return None
+        return Country.query.filter_by(code=code).first()
 
     @staticmethod
     def create(name: str, code: str) -> "Country":
-        """Create a new country"""
-        from src.persistence import repo
-
         country = Country(name, code)
-
-        repo.save(country)
-
+        db.session.add(country)
+        db.session.commit()
         return country
