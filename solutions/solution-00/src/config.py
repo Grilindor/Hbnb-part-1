@@ -19,8 +19,8 @@ class Config(ABC):
 
     DEBUG = False
     TESTING = False
-
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
 
 
 class DevelopmentConfig(Config):
@@ -39,8 +39,7 @@ class DevelopmentConfig(Config):
     ```
     """
 
-    SQLALCHEMY_DATABASE_URI = os.getenv(
-        "DATABASE_URL", "sqlite:///hbnb_dev.db")
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///hbnb_dev.db")
     DEBUG = True
 
 
@@ -48,7 +47,7 @@ class TestingConfig(Config):
     """
     Testing configuration settings
     This configuration is used when running tests.
-    You can enabled/disable things across the application
+    You can enable/disable things across the application
 
     To check if the application is running in testing mode, you can use:
     ```
